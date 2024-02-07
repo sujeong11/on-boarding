@@ -1,0 +1,9 @@
+logging:
+  level:
+    com.projectlyrics.onboarding: info
+    org.hibernate.sql: off
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
