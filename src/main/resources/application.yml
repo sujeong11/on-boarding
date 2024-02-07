@@ -1,0 +1,4 @@
+springdoc:
+  version: v1.0.0
+  swagger-ui:
+    operations-sorter: alpha
