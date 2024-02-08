@@ -20,7 +20,8 @@ public enum ErrorCode {
 	CONSTRAINT_VIOLATION(1101, "데이터 유효성 검사에 실패했습니다.", HttpStatus.BAD_REQUEST),
 
 	// Member
-	MEMBER_ID_NOT_FOUND(1200, "해당 아이디(PK)를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	MEMBER_LOGIN_ID_NOT_FOUND(1200, "해당 아이디를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	MEMBER_PASSWORD_NOT_FOUND(1201, "해당 비밀번호를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	;
 
 	private final Integer code;
