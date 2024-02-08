@@ -6,5 +6,5 @@ import lombok.NonNull;
 public record LogoutRequestDto(
 	@NonNull Long memberId,
 	@NotBlank String refreshToken
-	) {
+) {
 }

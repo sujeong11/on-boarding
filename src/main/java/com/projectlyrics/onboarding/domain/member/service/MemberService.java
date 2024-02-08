@@ -7,10 +7,10 @@ import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.request.LogoutRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
+import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
+import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundException;
-import com.projectlyrics.onboarding.domain.member.exception.MemberLoginIdNotFoundException;
-import com.projectlyrics.onboarding.domain.member.exception.MemberPasswordNotFoundException;
-import com.projectlyrics.onboarding.domain.member.exception.MemberRefreshTokenNotMatchException;
+import com.projectlyrics.onboarding.domain.member.exception.RefreshTokenNotMatchException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -25,11 +25,11 @@ public class MemberService {
 	@Transactional
 	public TokenResponseDto login(LoginRequestDto requestDto) {
 		if (!memberRepository.existsByLoginId(requestDto.loginId())) {
-			throw new MemberLoginIdNotFoundException();
+			throw new LoginIdNotFoundException();
 		}
 
 		Member member = memberRepository.findByLoginIdAndPassword(requestDto.loginId(), requestDto.password())
-			.orElseThrow(MemberPasswordNotFoundException::new);
+			.orElseThrow(LoginPasswordNotFoundException::new);
 
 		TokenResponseDto tokenDto = createToken();
 
@@ -44,7 +44,7 @@ public class MemberService {
 			.orElseThrow(MemberIdNotFoundException::new);
 
 		if (!member.getRefreshToken().equals(requestDto.refreshToken())) {
-			throw new MemberRefreshTokenNotMatchException();
+			throw new RefreshTokenNotMatchException();
 		}
 
 		member.deleteRefreshToken();
