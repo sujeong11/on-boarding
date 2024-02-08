@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
+import com.projectlyrics.onboarding.domain.member.dto.request.LogoutRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.service.MemberService;
 
@@ -26,5 +27,13 @@ public class MemberController {
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(memberService.login(requestDto));
+	}
+
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequestDto requestDto) {
+		memberService.logout(requestDto);
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(null);
 	}
 }

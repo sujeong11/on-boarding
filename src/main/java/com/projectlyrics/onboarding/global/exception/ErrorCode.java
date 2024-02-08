@@ -22,6 +22,8 @@ public enum ErrorCode {
 	// Member
 	MEMBER_LOGIN_ID_NOT_FOUND(1200, "해당 아이디를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	MEMBER_PASSWORD_NOT_FOUND(1201, "해당 비밀번호를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	MEMBER_ID_NOT_FOUND(1202, "해당 아이디(PK)를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	MEMBER_REFRESH_TOKEN_NOT_MATCH(1203, "회원의 리프레시 토큰과 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
 	;
 
 	private final Integer code;
