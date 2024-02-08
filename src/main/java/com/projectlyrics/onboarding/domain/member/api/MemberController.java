@@ -33,7 +33,7 @@ public class MemberController {
 	public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequestDto requestDto) {
 		memberService.logout(requestDto);
 		return ResponseEntity
-			.status(HttpStatus.OK)
+			.status(HttpStatus.NO_CONTENT)
 			.body(null);
 	}
 }
