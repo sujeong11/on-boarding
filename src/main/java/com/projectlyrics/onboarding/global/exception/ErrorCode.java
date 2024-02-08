@@ -24,6 +24,12 @@ public enum ErrorCode {
 	MEMBER_PASSWORD_NOT_FOUND(1201, "해당 비밀번호를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	MEMBER_ID_NOT_FOUND(1202, "해당 아이디(PK)를 가진 회원을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	MEMBER_REFRESH_TOKEN_NOT_MATCH(1203, "회원의 리프레시 토큰과 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+
+	// Auth
+	TOKEN_EXPIRED(1300, "유효기간이 만료된 토큰입니다.", HttpStatus.BAD_REQUEST),
+	TOKEN_NOT_VALID(1301, "유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST),
+	ACCESS_DENIED(1500, "권한이 없어 접근이 거부되었습니다.", HttpStatus.FORBIDDEN),
+	UNAUTHORIZED(1501, "인증과정에서 문제가 발생했습니다.", HttpStatus.UNAUTHORIZED),
 	;
 
 	private final Integer code;

@@ -12,6 +12,7 @@ import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoun
 import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.RefreshTokenNotMatchException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
+import com.projectlyrics.onboarding.global.security.JwtTokenProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 
 	private final MemberRepository memberRepository;
+	private final JwtTokenProvider jwtTokenProvider;
 
 	@Transactional
 	public TokenResponseDto login(LoginRequestDto requestDto) {
@@ -51,6 +53,8 @@ public class MemberService {
 	}
 
 	private TokenResponseDto createToken() {
-		return TokenResponseDto.of("임시 Access Token", "임시 Refresh Token");
+		String accessToken = jwtTokenProvider.createAccessToken(1L, Role.USER);
+		String refreshToken = jwtTokenProvider.createRefreshToken(1L, Role.USER);
+		return TokenResponseDto.of(accessToken, refreshToken);
 	}
 }
