@@ -1,4 +1,4 @@
-package com.projectlyrics.onboarding.config.exception;
+package com.projectlyrics.onboarding.global.exception;
 
 import org.springframework.http.HttpStatus;
 
