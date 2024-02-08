@@ -2,15 +2,16 @@ package com.projectlyrics.onboarding.domain.member.api;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
-import com.projectlyrics.onboarding.domain.member.dto.request.LogoutRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.service.MemberService;
+import com.projectlyrics.onboarding.global.security.CustomUserDetails;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,10 @@ public class MemberController {
 	}
 
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(@Valid @RequestBody LogoutRequestDto requestDto) {
-		memberService.logout(requestDto);
+	public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+		memberService.logout(memberId);
+
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.body(null);

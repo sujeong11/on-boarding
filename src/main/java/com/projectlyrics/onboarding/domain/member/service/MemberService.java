@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
-import com.projectlyrics.onboarding.domain.member.dto.request.LogoutRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
+import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
 import com.projectlyrics.onboarding.global.common.Role;
 import com.projectlyrics.onboarding.global.security.JwtTokenProvider;
@@ -42,13 +42,9 @@ public class MemberService {
 	}
 
 	@Transactional
-	public void logout(LogoutRequestDto requestDto) {
-		Member member = memberRepository.findById(requestDto.memberId())
+	public void logout(Long memberId) {
+		Member member = memberRepository.findById(memberId)
 			.orElseThrow(MemberIdNotFoundException::new);
-
-		if (!member.getRefreshToken().equals(requestDto.refreshToken())) {
-			throw new RefreshTokenNotMatchException();
-		}
 
 		member.deleteRefreshToken();
 	}
