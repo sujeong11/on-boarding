@@ -92,7 +92,9 @@ public class MemberService {
 			throw new LoginPasswordNotValidException();
 		}
 
-		member.updatePassword(requestDto.password());
+		member.updatePassword(
+			passwordEncoder.encode(requestDto.password())
+		);
 	}
 
 	private TokenResponseDto createToken() {
