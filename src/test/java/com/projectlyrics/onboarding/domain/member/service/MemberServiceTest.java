@@ -1,6 +1,6 @@
 package com.projectlyrics.onboarding.domain.member.service;
 
-import static org.assertj.core.api.BDDAssertions.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
@@ -54,6 +54,10 @@ class MemberServiceTest {
 		TokenResponseDto tokenResponseDto = sut.login(loginRequestDto);
 
 		// then
+		then(memberRepository).should().findByLoginId(anyString());
+		then(passwordEncoder).should().matches(anyString(), anyString());
+		then(jwtTokenProvider).should().createAccessToken(anyLong(), any(Role.class));
+		then(jwtTokenProvider).should().createRefreshToken(anyLong(), any(Role.class));
 		assertThat(member.getRefreshToken()).isNotNull();
 		assertThat(tokenResponseDto.accessToken()).isEqualTo(accessToken);
 		assertThat(tokenResponseDto.refreshToken()).isEqualTo(refreshToken);
@@ -69,6 +73,9 @@ class MemberServiceTest {
 		Throwable throwable = catchThrowable(() -> sut.login(loginRequestDto));
 
 		// then
+		then(memberRepository).should().findByLoginId(anyString());
+		then(passwordEncoder).shouldHaveNoInteractions();
+		then(jwtTokenProvider).shouldHaveNoInteractions();
 		assertThat(throwable).isInstanceOf(LoginIdNotFoundException.class);
 	}
 
@@ -84,6 +91,9 @@ class MemberServiceTest {
 		Throwable throwable = catchThrowable(() -> sut.login(loginRequestDto));
 
 		// then
+		then(memberRepository).should().findByLoginId(anyString());
+		then(passwordEncoder).should().matches(anyString(), anyString());
+		then(jwtTokenProvider).shouldHaveNoInteractions();
 		assertThat(throwable).isInstanceOf(LoginPasswordNotFoundException.class);
 	}
 
@@ -97,6 +107,7 @@ class MemberServiceTest {
 		sut.logout(anyLong());
 
 		// then
+		then(memberRepository).should().findById(anyLong());
 		assertThat(member.getRefreshToken()).isNull();
 	}
 
