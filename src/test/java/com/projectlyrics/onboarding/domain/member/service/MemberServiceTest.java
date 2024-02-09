@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,7 @@ import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
+import com.projectlyrics.onboarding.global.common.ConstantUtil;
 import com.projectlyrics.onboarding.global.common.Role;
 import com.projectlyrics.onboarding.global.security.JwtTokenProvider;
 import com.projectlyrics.onboarding.util.MemberTestUtil;
@@ -41,10 +43,10 @@ class MemberServiceTest {
 	@Test
 	void 사용자가_로그인에_성공한다면_액세스_토큰과_리프레시_토큰을_응답한다() {
 		// given
-		Member member = MemberTestUtil.createMember();
-		LoginRequestDto loginRequestDto = createLoginRequestDto();
 		String accessToken = "access-token";
 		String refreshToken = "refresh-token";
+		Member member = MemberTestUtil.createMember();
+		LoginRequestDto loginRequestDto = createLoginRequestDto();
 		given(memberRepository.findByLoginId(anyString())).willReturn(Optional.of(member));
 		given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
 		given(jwtTokenProvider.createAccessToken(anyLong(), any(Role.class))).willReturn(accessToken);
@@ -55,7 +57,10 @@ class MemberServiceTest {
 
 		// then
 		then(memberRepository).should().findByLoginId(anyString());
-		then(passwordEncoder).should().matches(anyString(), anyString());
+		then(passwordEncoder).should().matches(
+			argThat(password -> Pattern.matches(ConstantUtil.PASSWORD_REGEX, loginRequestDto.password())),
+			anyString()
+		);
 		then(jwtTokenProvider).should().createAccessToken(anyLong(), any(Role.class));
 		then(jwtTokenProvider).should().createRefreshToken(anyLong(), any(Role.class));
 		assertThat(member.getRefreshToken()).isNotNull();
