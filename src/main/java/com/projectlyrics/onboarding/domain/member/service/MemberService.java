@@ -1,15 +1,22 @@
 package com.projectlyrics.onboarding.domain.member.service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
+import com.projectlyrics.onboarding.domain.member.dto.request.UpdateNicknameRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
+import com.projectlyrics.onboarding.domain.member.dto.response.UpdateNicknameResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundException;
+import com.projectlyrics.onboarding.domain.member.exception.NicknameDuplicatedException;
+import com.projectlyrics.onboarding.domain.member.exception.NicknameUpdateTimeException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
 import com.projectlyrics.onboarding.global.common.Role;
 import com.projectlyrics.onboarding.global.security.JwtTokenProvider;
@@ -47,6 +54,24 @@ public class MemberService {
 			.orElseThrow(MemberIdNotFoundException::new);
 
 		member.deleteRefreshToken();
+	}
+
+	@Transactional
+	public UpdateNicknameResponseDto updateNickname(Long memberId, UpdateNicknameRequestDto requestDto) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(MemberIdNotFoundException::new);
+
+		if (memberRepository.existsByNickname(requestDto.nickname())) {
+			throw new NicknameDuplicatedException();
+		}
+
+		if (Duration.between(member.getUpdateAt(), LocalDateTime.now()).toDays() < 30) {
+			throw new NicknameUpdateTimeException();
+		}
+
+		member.updateNickname(requestDto.nickname());
+
+		return UpdateNicknameResponseDto.from(member);
 	}
 
 	private TokenResponseDto createToken() {

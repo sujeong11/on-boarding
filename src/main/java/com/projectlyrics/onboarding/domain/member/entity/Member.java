@@ -51,4 +51,8 @@ public class Member extends BaseTimeEntity {
 	public void deleteRefreshToken() {
 		this.refreshToken = null;
 	}
+
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
 }

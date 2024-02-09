@@ -3,13 +3,16 @@ package com.projectlyrics.onboarding.domain.member.api;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
+import com.projectlyrics.onboarding.domain.member.dto.request.UpdateNicknameRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
+import com.projectlyrics.onboarding.domain.member.dto.response.UpdateNicknameResponseDto;
 import com.projectlyrics.onboarding.domain.member.service.MemberService;
 import com.projectlyrics.onboarding.global.security.CustomUserDetails;
 
@@ -38,5 +41,17 @@ public class MemberController {
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.body(null);
+	}
+
+	@PatchMapping("/nickname")
+	public ResponseEntity<UpdateNicknameResponseDto> updateNickname(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@Valid @RequestBody UpdateNicknameRequestDto requestDto
+	) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(memberService.updateNickname(memberId, requestDto));
 	}
 }
