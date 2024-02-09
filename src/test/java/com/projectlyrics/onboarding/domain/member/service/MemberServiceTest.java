@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -11,14 +12,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
+import com.projectlyrics.onboarding.domain.member.dto.request.UpdateNicknameRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
+import com.projectlyrics.onboarding.domain.member.exception.NicknameDuplicatedException;
+import com.projectlyrics.onboarding.domain.member.exception.NicknameUpdateTimeException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
 import com.projectlyrics.onboarding.global.common.ConstantUtil;
 import com.projectlyrics.onboarding.global.common.Role;
@@ -116,7 +121,46 @@ class MemberServiceTest {
 		assertThat(member.getRefreshToken()).isNull();
 	}
 
+	@Test
+	void 닉네임_수정_시_다른_사용자가_사용_중인_닉네임으로_변경하려고_하면_에러가_발생한다() {
+		// given
+		Member member = MemberTestUtil.createLoginMember();
+		UpdateNicknameRequestDto updateNicknameRequestDto = createUpdateNicknameRequestDto();
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+		given(memberRepository.existsByNickname(anyString())).willReturn(true);
+
+		// when
+		Throwable throwable = catchThrowable(() -> sut.updateNickname(anyLong(), updateNicknameRequestDto));
+
+		// then
+		then(memberRepository).should().findById(anyLong());
+		then(memberRepository).should().existsByNickname(anyString());
+		assertThat(throwable).isInstanceOf(NicknameDuplicatedException.class);
+	}
+
+	@Test
+	void 닉네임을_수정한_지_30일이_지나지_않았을때_닉네임을_수정하려고_하면_에러가_발생한다() {
+		// given
+		Member member = Mockito.spy(MemberTestUtil.createLoginMember());
+		UpdateNicknameRequestDto updateNicknameRequestDto = createUpdateNicknameRequestDto();
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+		given(memberRepository.existsByNickname(anyString())).willReturn(false);
+		doReturn(LocalDateTime.now().minusDays(29)).when(member).getUpdateAt();
+
+		// when
+		Throwable throwable = catchThrowable(() -> sut.updateNickname(anyLong(), updateNicknameRequestDto));
+
+		// then
+		then(memberRepository).should().findById(anyLong());
+		then(memberRepository).should().existsByNickname(anyString());
+		assertThat(throwable).isInstanceOf(NicknameUpdateTimeException.class);
+	}
+
 	private LoginRequestDto createLoginRequestDto() {
 		return new LoginRequestDto("id", "aaAA1122!");
+	}
+
+	private UpdateNicknameRequestDto createUpdateNicknameRequestDto() {
+		return new UpdateNicknameRequestDto("nickname");
 	}
 }
