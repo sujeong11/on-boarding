@@ -18,9 +18,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.request.UpdateNicknameRequestDto;
+import com.projectlyrics.onboarding.domain.member.dto.request.UpdatePasswordRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
+import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotChangeException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameDuplicatedException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameUpdateTimeException;
@@ -156,11 +158,49 @@ class MemberServiceTest {
 		assertThat(throwable).isInstanceOf(NicknameUpdateTimeException.class);
 	}
 
+	@Test
+	void 비밀번호_수정_시_입력받은_배밀번호를_DB에_암호화해_업데이트한다() {
+		// given
+		Member member = MemberTestUtil.createLoginMember();
+		UpdatePasswordRequestDto updatePasswordRequestDto = createUpdatePasswordRequestDto("aaA123!");
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+
+		// when
+		sut.updatePassword(anyLong(), updatePasswordRequestDto);
+
+		// then
+		then(memberRepository).should().findById(anyLong());
+		then(passwordEncoder).should().encode(
+			argThat(password -> Pattern.matches(ConstantUtil.PASSWORD_REGEX, updatePasswordRequestDto.password()))
+		);
+		assertThat(member.getPassword()).isNotEqualTo(updatePasswordRequestDto.password());
+	}
+
+	@Test
+	void 변경_전_비밀번호와_변경하려고_하는_비밀번호가_동일하다면_에러가_발생한다() {
+		// given
+		Member member = MemberTestUtil.createLoginMember();
+		UpdatePasswordRequestDto updatePasswordRequestDto = createUpdatePasswordRequestDto(member.getPassword());
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+
+		// when
+		Throwable throwable = catchThrowable(() -> sut.updatePassword(anyLong(), updatePasswordRequestDto));
+
+		// then
+		then(memberRepository).should().findById(anyLong());
+		then(passwordEncoder).shouldHaveNoInteractions();
+		assertThat(throwable).isInstanceOf(LoginPasswordNotChangeException.class);
+	}
+
 	private LoginRequestDto createLoginRequestDto() {
 		return new LoginRequestDto("id", "aaAA1122!");
 	}
 
 	private UpdateNicknameRequestDto createUpdateNicknameRequestDto() {
 		return new UpdateNicknameRequestDto("nickname");
+	}
+
+	private UpdatePasswordRequestDto createUpdatePasswordRequestDto(String password) {
+		return new UpdatePasswordRequestDto(password);
 	}
 }
