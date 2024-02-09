@@ -1,4 +1,4 @@
-package com.projectlyrics.onboarding.config.exception;
+package com.projectlyrics.onboarding.global.exception;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.projectlyrics.onboarding.config.exception.dto.ErrorResponse;
+import com.projectlyrics.onboarding.global.exception.dto.ErrorResponse;
 
 import jakarta.validation.ConstraintViolationException;
 
