@@ -14,6 +14,15 @@ public class MemberTestUtil {
 			.build();
 	}
 
+	public static Member createLoginMember() {
+		return Member.builder()
+			.loginId("id")
+			.password(encodePassword())
+			.nickname("sujeong")
+			.refreshToken("임시 Refresh Token")
+			.build();
+	}
+
 	private static String encodePassword() {
 		return new BCryptPasswordEncoder().encode("aaAA1122!");
 	}

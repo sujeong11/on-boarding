@@ -87,6 +87,19 @@ class MemberServiceTest {
 		assertThat(throwable).isInstanceOf(LoginPasswordNotFoundException.class);
 	}
 
+	@Test
+	void 로그아웃_요청_시_DB의_사용자_리프레시_토큰을_null로_업데이트를_한다() {
+		// given
+		Member member = MemberTestUtil.createLoginMember();
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+
+		// when
+		sut.logout(anyLong());
+
+		// then
+		assertThat(member.getRefreshToken()).isNull();
+	}
+
 	private LoginRequestDto createLoginRequestDto() {
 		return new LoginRequestDto("id", "aaAA1122!");
 	}
