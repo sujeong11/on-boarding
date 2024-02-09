@@ -1,6 +1,13 @@
 package com.projectlyrics.onboarding.domain.member.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import com.projectlyrics.onboarding.global.common.ConstantUtil;
 
-public record UpdatePasswordRequestDto(@NotBlank String password) {
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
+public record UpdatePasswordRequestDto(
+	@NotNull
+	@Pattern(regexp = ConstantUtil.PASSWORD_REGEX, message = ConstantUtil.PASSWORD_REGEX_ERROR_MSG)
+	String password
+) {
 }

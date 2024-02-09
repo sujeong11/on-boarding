@@ -2,7 +2,6 @@ package com.projectlyrics.onboarding.domain.member.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.regex.Pattern;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotChangeException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
-import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotValidException;
 import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameDuplicatedException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameUpdateTimeException;
@@ -86,10 +84,6 @@ public class MemberService {
 
 		if (member.getPassword().equals(requestDto.password())) {
 			throw new LoginPasswordNotChangeException();
-		}
-
-		if (!Pattern.matches(ConstantUtil.PASSWORD_REGEX, requestDto.password())) {
-			throw new LoginPasswordNotValidException();
 		}
 
 		member.updatePassword(
