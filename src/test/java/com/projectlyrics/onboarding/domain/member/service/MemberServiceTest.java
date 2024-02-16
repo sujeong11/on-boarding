@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -23,10 +24,10 @@ import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.UpdateNicknameResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
-import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotChangeException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameDuplicatedException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameUpdateTimeException;
+import com.projectlyrics.onboarding.domain.member.exception.UsedPasswordUseException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
 import com.projectlyrics.onboarding.global.common.ConstantUtil;
 import com.projectlyrics.onboarding.global.common.Role;
@@ -198,10 +199,11 @@ class MemberServiceTest {
 	@Test
 	void 변경_전_비밀번호와_변경하려고_하는_비밀번호가_동일하다면_에러가_발생한다() {
 		// given
-		Member member = MemberTestUtil.createLoginMember();
+		Member member = Mockito.spy(MemberTestUtil.createLoginMember());
 		UpdatePasswordRequestDto updatePasswordRequestDto = createUpdatePasswordRequestDto(member.getPassword());
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
 		given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
+		doReturn(List.of("encode password")).when(member).getUsedPasswordList();
 
 		// when
 		Throwable throwable = catchThrowable(() -> sut.updatePassword(anyLong(), updatePasswordRequestDto));
@@ -209,7 +211,7 @@ class MemberServiceTest {
 		// then
 		then(memberRepository).should().findById(anyLong());
 		then(passwordEncoder).should().matches(anyString(), anyString());
-		assertThat(throwable).isInstanceOf(LoginPasswordNotChangeException.class);
+		assertThat(throwable).isInstanceOf(UsedPasswordUseException.class);
 	}
 
 	private LoginRequestDto createLoginRequestDto() {

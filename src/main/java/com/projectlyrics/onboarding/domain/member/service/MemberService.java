@@ -2,6 +2,7 @@ package com.projectlyrics.onboarding.domain.member.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,11 +15,11 @@ import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.UpdateNicknameResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
-import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotChangeException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameDuplicatedException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameUpdateTimeException;
+import com.projectlyrics.onboarding.domain.member.exception.UsedPasswordUseException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
 import com.projectlyrics.onboarding.global.common.Role;
 import com.projectlyrics.onboarding.global.security.JwtTokenProvider;
@@ -84,11 +85,16 @@ public class MemberService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(MemberIdNotFoundException::new);
 
-		if (passwordEncoder.matches(requestDto.password(), member.getPassword())) {
-			throw new LoginPasswordNotChangeException();
+		List<String> usedPasswordList = member.getUsedPasswordList();
+
+		for (String usedPassword : usedPasswordList) {
+			if (passwordEncoder.matches(requestDto.password(), usedPassword)) {
+				throw new UsedPasswordUseException();
+			}
 		}
 
 		member.updatePassword(
+			member.getPassword(),
 			passwordEncoder.encode(requestDto.password())
 		);
 	}

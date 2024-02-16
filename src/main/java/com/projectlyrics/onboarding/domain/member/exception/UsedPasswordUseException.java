@@ -3,9 +3,9 @@ package com.projectlyrics.onboarding.domain.member.exception;
 import com.projectlyrics.onboarding.global.exception.BusinessException;
 import com.projectlyrics.onboarding.global.exception.ErrorCode;
 
-public class LoginPasswordNotChangeException extends BusinessException {
+public class UsedPasswordUseException extends BusinessException {
 
-	public LoginPasswordNotChangeException() {
-		super(ErrorCode.MEMBER_PASSWORD_NOT_CHANGE);
+	public UsedPasswordUseException() {
+		super(ErrorCode.MEMBER_USED_PASSWORD_USE);
 	}
 }
