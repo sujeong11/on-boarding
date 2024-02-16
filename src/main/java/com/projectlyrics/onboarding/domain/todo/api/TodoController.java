@@ -67,6 +67,18 @@ public class TodoController {
 			.body(todoService.getTodoList(memberId, startTodoId, size));
 	}
 
+	@GetMapping("/deleted/{todoId}")
+	public ResponseEntity<TodoDto> getDeletedTodo(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable(value = "todoId") Long todoId
+	) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(todoService.getDeletedTodo(memberId, todoId));
+	}
+
 	@PatchMapping("/{todoId}")
 	public ResponseEntity<TodoDto> updateTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,

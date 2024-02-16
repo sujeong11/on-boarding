@@ -81,6 +81,21 @@ public class TodoService {
 		return new SliceImpl<>(todoDtoList, pageable, todoList.hasNext());
 	}
 
+	public TodoDto getDeletedTodo(Long memberId, Long todoId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberIdNotFoundException();
+		}
+
+		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
+			.orElseThrow(TodoIdNotFoundException::new);
+
+		if (todo.getMember().getId() != memberId) {
+			throw new TodoMemberNotMatchException();
+		}
+
+		return TodoDto.from(todo);
+	}
+
 	@Transactional
 	public TodoDto updateTodo(Long memberId, Long todoId, UpdateTodoRequestDto requestDto) {
 		if (!memberRepository.existsById(memberId)) {
