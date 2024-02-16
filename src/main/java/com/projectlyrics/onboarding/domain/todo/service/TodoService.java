@@ -100,7 +100,7 @@ public class TodoService {
 	}
 
 	@Transactional
-	public void deleteTodo(Long memberId, Long todoId) {
+	public void softDeleteTodo(Long memberId, Long todoId) {
 		if (!memberRepository.existsById(memberId)) {
 			throw new MemberIdNotFoundException();
 		}
@@ -113,6 +113,22 @@ public class TodoService {
 		}
 
 		todo.deleteTodo();
+	}
+
+	@Transactional
+	public void hardDeleteTodo(Long memberId, Long todoId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberIdNotFoundException();
+		}
+
+		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
+			.orElseThrow(TodoIdNotFoundException::new);
+
+		if (todo.getMember().getId() != memberId) {
+			throw new TodoMemberNotMatchException();
+		}
+
+		todoRepository.deleteById(todoId);
 	}
 
 	@Transactional

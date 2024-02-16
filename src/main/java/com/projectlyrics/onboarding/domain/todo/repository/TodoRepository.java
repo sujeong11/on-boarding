@@ -23,4 +23,6 @@ public interface TodoRepository extends Repository<Todo, Long> {
 	Slice<Todo> findNotDeletedTodoAll(@Param("startTodoId") Long startTodoId, Pageable pageable);
 
 	Optional<Todo> findByIdAndIsDeletedIsTrue(Long todoId);
+
+	void deleteById(Long todoId);
 }

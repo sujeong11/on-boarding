@@ -80,13 +80,26 @@ public class TodoController {
 			.body(todoService.updateTodo(memberId, todoId, requestDto));
 	}
 
-	@DeleteMapping("/{todoId}")
-	public ResponseEntity<Void> deleteTodo(
+	@DeleteMapping("/soft/{todoId}")
+	public ResponseEntity<Void> softDeleteTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId
 	) {
 		Long memberId = Long.valueOf(userDetails.getMemberId());
-		todoService.deleteTodo(memberId, todoId);
+		todoService.softDeleteTodo(memberId, todoId);
+
+		return ResponseEntity
+			.status(HttpStatus.NO_CONTENT)
+			.body(null);
+	}
+
+	@DeleteMapping("/hard/{todoId}")
+	public ResponseEntity<Void> hardDeleteTodo(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable(value = "todoId") Long todoId
+	) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+		todoService.hardDeleteTodo(memberId, todoId);
 
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
