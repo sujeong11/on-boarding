@@ -43,6 +43,21 @@ public class TodoService {
 		return TodoDto.from(savedTodo);
 	}
 
+	public TodoDto getTodo(Long memberId, Long todoId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberIdNotFoundException();
+		}
+
+		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
+			.orElseThrow(TodoIdNotFoundException::new);
+
+		if (todo.getMember().getId() != memberId) {
+			throw new TodoMemberNotMatchException();
+		}
+
+		return TodoDto.from(todo);
+	}
+
 	@Transactional
 	public TodoDto updateTodo(Long memberId, Long todoId, UpdateTodoRequestDto requestDto) {
 		if (!memberRepository.existsById(memberId)) {

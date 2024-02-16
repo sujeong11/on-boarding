@@ -3,6 +3,7 @@ package com.projectlyrics.onboarding.domain.todo.api;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,18 @@ public class TodoController {
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
 			.body(todoService.createTodo(memberId, requestDto));
+	}
+
+	@GetMapping("/{todoId}")
+	public ResponseEntity<TodoDto> getTodo(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable(value = "todoId") Long todoId
+	) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(todoService.getTodo(memberId, todoId));
 	}
 
 	@PatchMapping("/{todoId}")
