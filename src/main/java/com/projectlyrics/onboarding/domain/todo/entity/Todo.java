@@ -66,4 +66,8 @@ public class Todo extends BaseTimeEntity {
 	public void deleteTodo() {
 		this.isDeleted = true;
 	}
+
+	public void restoreTodo() {
+		this.isDeleted = false;
+	}
 }

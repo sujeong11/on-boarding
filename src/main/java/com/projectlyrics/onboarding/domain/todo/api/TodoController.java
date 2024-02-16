@@ -92,4 +92,16 @@ public class TodoController {
 			.status(HttpStatus.NO_CONTENT)
 			.body(null);
 	}
+
+	@PatchMapping("/restoration/{todoId}")
+	public ResponseEntity<TodoDto> restoreTodo(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable(value = "todoId") Long todoId
+	) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(todoService.restoreTodo(memberId, todoId));
+	}
 }

@@ -21,4 +21,6 @@ public interface TodoRepository extends Repository<Todo, Long> {
 
 	@Query("SELECT t FROM Todo t WHERE t.id > :startTodoId AND t.isDeleted = FALSE")
 	Slice<Todo> findNotDeletedTodoAll(@Param("startTodoId") Long startTodoId, Pageable pageable);
+
+	Optional<Todo> findByIdAndIsDeletedIsTrue(Long todoId);
 }
