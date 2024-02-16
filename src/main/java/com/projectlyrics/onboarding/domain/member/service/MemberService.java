@@ -84,7 +84,7 @@ public class MemberService {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(MemberIdNotFoundException::new);
 
-		if (member.getPassword().equals(requestDto.password())) {
+		if (passwordEncoder.matches(requestDto.password(), member.getPassword())) {
 			throw new LoginPasswordNotChangeException();
 		}
 

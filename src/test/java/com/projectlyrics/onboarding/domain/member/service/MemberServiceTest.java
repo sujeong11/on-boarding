@@ -201,13 +201,14 @@ class MemberServiceTest {
 		Member member = MemberTestUtil.createLoginMember();
 		UpdatePasswordRequestDto updatePasswordRequestDto = createUpdatePasswordRequestDto(member.getPassword());
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+		given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
 
 		// when
 		Throwable throwable = catchThrowable(() -> sut.updatePassword(anyLong(), updatePasswordRequestDto));
 
 		// then
 		then(memberRepository).should().findById(anyLong());
-		then(passwordEncoder).shouldHaveNoInteractions();
+		then(passwordEncoder).should().matches(anyString(), anyString());
 		assertThat(throwable).isInstanceOf(LoginPasswordNotChangeException.class);
 	}
 
