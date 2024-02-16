@@ -1,5 +1,7 @@
 package com.projectlyrics.onboarding.domain.member.entity;
 
+import java.time.LocalDateTime;
+
 import com.projectlyrics.onboarding.global.common.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -36,6 +38,9 @@ public class Member extends BaseTimeEntity {
 	@Column
 	private String refreshToken;
 
+	@Column
+	private LocalDateTime nicknameUpdateAt;
+
 	@Builder
 	private Member(String loginId, String password, String nickname, String refreshToken) {
 		this.loginId = loginId;
@@ -54,6 +59,7 @@ public class Member extends BaseTimeEntity {
 
 	public void updateNickname(String nickname) {
 		this.nickname = nickname;
+		this.nicknameUpdateAt = LocalDateTime.now();
 	}
 
 	public void updatePassword(String password) {

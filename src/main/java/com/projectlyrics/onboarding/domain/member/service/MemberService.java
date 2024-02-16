@@ -20,7 +20,6 @@ import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundExce
 import com.projectlyrics.onboarding.domain.member.exception.NicknameDuplicatedException;
 import com.projectlyrics.onboarding.domain.member.exception.NicknameUpdateTimeException;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
-import com.projectlyrics.onboarding.global.common.ConstantUtil;
 import com.projectlyrics.onboarding.global.common.Role;
 import com.projectlyrics.onboarding.global.security.JwtTokenProvider;
 
@@ -68,7 +67,10 @@ public class MemberService {
 			throw new NicknameDuplicatedException();
 		}
 
-		if (Duration.between(member.getUpdateAt(), LocalDateTime.now()).toDays() < 30) {
+		boolean isUpdatable = member.getNicknameUpdateAt() == null
+			? true : Duration.between(member.getNicknameUpdateAt(), LocalDateTime.now()).toDays() > 30;
+
+		if (!isUpdatable) {
 			throw new NicknameUpdateTimeException();
 		}
 

@@ -20,6 +20,7 @@ import com.projectlyrics.onboarding.domain.member.dto.request.LoginRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.request.UpdateNicknameRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.request.UpdatePasswordRequestDto;
 import com.projectlyrics.onboarding.domain.member.dto.response.TokenResponseDto;
+import com.projectlyrics.onboarding.domain.member.dto.response.UpdateNicknameResponseDto;
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.LoginIdNotFoundException;
 import com.projectlyrics.onboarding.domain.member.exception.LoginPasswordNotChangeException;
@@ -124,6 +125,24 @@ class MemberServiceTest {
 	}
 
 	@Test
+	void 사용자의_nicknameUpdateAt_필드가_null이라면_닉네임을_변경한_적이_없으므로_닉네임_수정을_허용한다() {
+		// given
+		Member member = Mockito.spy(MemberTestUtil.createLoginMember());
+		UpdateNicknameRequestDto expectUpdateNicknameDto = createUpdateNicknameRequestDto();
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+		given(memberRepository.existsByNickname(anyString())).willReturn(false);
+		doReturn(null).when(member).getNicknameUpdateAt();
+
+		// when
+		UpdateNicknameResponseDto actualUpdateNicknameDto = sut.updateNickname(anyLong(), expectUpdateNicknameDto);
+
+		// then
+		then(memberRepository).should().findById(anyLong());
+		then(memberRepository).should().existsByNickname(anyString());
+		assertThat(actualUpdateNicknameDto.nickname()).isEqualTo(expectUpdateNicknameDto.nickname());
+	}
+
+	@Test
 	void 닉네임_수정_시_다른_사용자가_사용_중인_닉네임으로_변경하려고_하면_에러가_발생한다() {
 		// given
 		Member member = MemberTestUtil.createLoginMember();
@@ -147,7 +166,7 @@ class MemberServiceTest {
 		UpdateNicknameRequestDto updateNicknameRequestDto = createUpdateNicknameRequestDto();
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
 		given(memberRepository.existsByNickname(anyString())).willReturn(false);
-		doReturn(LocalDateTime.now().minusDays(29)).when(member).getUpdateAt();
+		doReturn(LocalDateTime.now().minusDays(29)).when(member).getNicknameUpdateAt();
 
 		// when
 		Throwable throwable = catchThrowable(() -> sut.updateNickname(anyLong(), updateNicknameRequestDto));
