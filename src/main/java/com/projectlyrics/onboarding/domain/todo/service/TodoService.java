@@ -1,5 +1,12 @@
 package com.projectlyrics.onboarding.domain.todo.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +63,22 @@ public class TodoService {
 		}
 
 		return TodoDto.from(todo);
+	}
+
+	public Slice<TodoDto> getTodoList(Long memberId, Long startTodoId, int size) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberIdNotFoundException();
+		}
+
+		Pageable pageable = PageRequest.of(0, size);
+
+		Slice<Todo> todoList = todoRepository.findNotDeletedTodoAll(startTodoId, pageable);
+
+		List<TodoDto> todoDtoList = todoList.stream()
+			.map(TodoDto::from)
+			.collect(Collectors.toUnmodifiableList());
+
+		return new SliceImpl<>(todoDtoList, pageable, todoList.hasNext());
 	}
 
 	@Transactional
