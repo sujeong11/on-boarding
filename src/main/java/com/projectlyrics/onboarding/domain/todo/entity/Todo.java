@@ -57,4 +57,9 @@ public class Todo extends BaseTimeEntity {
 		this.memo = memo;
 		this.orders = orders;
 	}
+
+	public void updateTodo(String title, String memo) {
+		this.title = title;
+		this.memo = memo;
+	}
 }

@@ -13,4 +13,6 @@ public interface MemberRepository extends Repository<Member, Long> {
 	Optional<Member> findByLoginId(String loginId);
 
 	boolean existsByNickname(String nickname);
+
+	boolean existsById(Long memberId);
 }

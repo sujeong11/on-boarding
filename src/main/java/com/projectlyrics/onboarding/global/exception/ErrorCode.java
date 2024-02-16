@@ -31,8 +31,12 @@ public enum ErrorCode {
 	// Auth
 	TOKEN_EXPIRED(1300, "유효기간이 만료된 토큰입니다.", HttpStatus.BAD_REQUEST),
 	TOKEN_NOT_VALID(1301, "유효하지 않은 토큰입니다.", HttpStatus.BAD_REQUEST),
-	ACCESS_DENIED(1500, "권한이 없어 접근이 거부되었습니다.", HttpStatus.FORBIDDEN),
-	UNAUTHORIZED(1501, "인증과정에서 문제가 발생했습니다.", HttpStatus.UNAUTHORIZED),
+	ACCESS_DENIED(1302, "권한이 없어 접근이 거부되었습니다.", HttpStatus.FORBIDDEN),
+	UNAUTHORIZED(1303, "인증과정에서 문제가 발생했습니다.", HttpStatus.UNAUTHORIZED),
+
+	// Todo
+	TODO_ID_NOT_FOUND(1400, "해당 아이디(PK)를 가진 할 일을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+	TODO_MEMBER_ID_NOT_MATCH(1401, "해당 사용자가 작성한 할 일이 아닙니다.", HttpStatus.BAD_REQUEST),
 	;
 
 	private final Integer code;
