@@ -98,4 +98,20 @@ public class TodoService {
 
 		return TodoDto.from(todo);
 	}
+
+	@Transactional
+	public void deleteTodo(Long memberId, Long todoId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberIdNotFoundException();
+		}
+
+		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
+			.orElseThrow(TodoIdNotFoundException::new);
+
+		if (todo.getMember().getId() != memberId) {
+			throw new TodoMemberNotMatchException();
+		}
+
+		todo.deleteTodo();
+	}
 }

@@ -4,6 +4,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,5 +78,18 @@ public class TodoController {
 		return ResponseEntity
 			.status(HttpStatus.OK)
 			.body(todoService.updateTodo(memberId, todoId, requestDto));
+	}
+
+	@DeleteMapping("/{todoId}")
+	public ResponseEntity<Void> deleteTodo(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable(value = "todoId") Long todoId
+	) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+		todoService.deleteTodo(memberId, todoId);
+
+		return ResponseEntity
+			.status(HttpStatus.NO_CONTENT)
+			.body(null);
 	}
 }

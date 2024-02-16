@@ -62,4 +62,8 @@ public class Todo extends BaseTimeEntity {
 		this.title = title;
 		this.memo = memo;
 	}
+
+	public void deleteTodo() {
+		this.isDeleted = true;
+	}
 }
