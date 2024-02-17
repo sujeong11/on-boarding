@@ -1,5 +1,7 @@
 package com.projectlyrics.onboarding.domain.todo.api;
 
+import java.util.Objects;
+
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +26,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/todo")
+@RequestMapping("/api/v1")
 @RestController
 public class TodoController {
 
 	private final TodoService todoService;
 
-	@PostMapping
+	@PostMapping("/todo")
 	public ResponseEntity<TodoDto> createTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestBody CreateTodoRequestDto requestDto
@@ -42,57 +44,42 @@ public class TodoController {
 			.body(todoService.createTodo(memberId, requestDto));
 	}
 
-	@GetMapping("/{todoId}")
+	@GetMapping("/todo/{todoId}")
 	public ResponseEntity<TodoDto> getTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable(value = "todoId") Long todoId
+		@PathVariable(value = "todoId") Long todoId,
+		@RequestParam(value = "status", required = false) String status
 	) {
 		Long memberId = Long.valueOf(userDetails.getMemberId());
 
+		TodoDto todoDto = Objects.equals(status, "deleted")
+			? todoService.getDeletedTodo(memberId, todoId)
+			: todoService.getTodo(memberId, todoId);
+
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(todoService.getTodo(memberId, todoId));
+			.body(todoDto);
 	}
 
-	@GetMapping
+	@GetMapping("/todos")
 	public ResponseEntity<Slice<TodoDto>> getTodoList(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestParam(value = "status", required = false) String status,
 		@RequestParam(value = "startTodoId") Long startTodoId,
 		@RequestParam(value = "size") int size
 	) {
 		Long memberId = Long.valueOf(userDetails.getMemberId());
 
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(todoService.getTodoList(memberId, startTodoId, size));
-	}
-
-	@GetMapping("/deleted/{todoId}")
-	public ResponseEntity<TodoDto> getDeletedTodo(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable(value = "todoId") Long todoId
-	) {
-		Long memberId = Long.valueOf(userDetails.getMemberId());
+		Slice<TodoDto> todoDtoList = Objects.equals(status, "deleted")
+			? todoService.getDeletedTodoList(memberId, startTodoId, size)
+			: todoService.getTodoList(memberId, startTodoId, size);
 
 		return ResponseEntity
 			.status(HttpStatus.OK)
-			.body(todoService.getDeletedTodo(memberId, todoId));
+			.body(todoDtoList);
 	}
 
-	@GetMapping("/deleted")
-	public ResponseEntity<Slice<TodoDto>> getDeletedTodoList(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam(value = "startTodoId") Long startTodoId,
-		@RequestParam(value = "size") int size
-	) {
-		Long memberId = Long.valueOf(userDetails.getMemberId());
-
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(todoService.getDeletedTodoList(memberId, startTodoId, size));
-	}
-
-	@PatchMapping("/{todoId}")
+	@PatchMapping("/todo/{todoId}")
 	public ResponseEntity<TodoDto> updateTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId,
@@ -105,33 +92,26 @@ public class TodoController {
 			.body(todoService.updateTodo(memberId, todoId, requestDto));
 	}
 
-	@DeleteMapping("/soft/{todoId}")
+	@DeleteMapping("/todo/{todoId}")
 	public ResponseEntity<Void> softDeleteTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable(value = "todoId") Long todoId
+		@PathVariable(value = "todoId") Long todoId,
+		@RequestParam(value = "method") String method
 	) {
 		Long memberId = Long.valueOf(userDetails.getMemberId());
-		todoService.softDeleteTodo(memberId, todoId);
+
+		if (Objects.equals(method, "soft")) {
+			todoService.softDeleteTodo(memberId, todoId);
+		} else {
+			todoService.hardDeleteTodo(memberId, todoId);
+		}
 
 		return ResponseEntity
 			.status(HttpStatus.NO_CONTENT)
 			.body(null);
 	}
 
-	@DeleteMapping("/hard/{todoId}")
-	public ResponseEntity<Void> hardDeleteTodo(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable(value = "todoId") Long todoId
-	) {
-		Long memberId = Long.valueOf(userDetails.getMemberId());
-		todoService.hardDeleteTodo(memberId, todoId);
-
-		return ResponseEntity
-			.status(HttpStatus.NO_CONTENT)
-			.body(null);
-	}
-
-	@PatchMapping("/restoration/{todoId}")
+	@PatchMapping("/todo/restoration/{todoId}")
 	public ResponseEntity<TodoDto> restoreTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId
