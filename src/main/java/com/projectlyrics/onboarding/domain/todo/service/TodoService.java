@@ -1,7 +1,6 @@
 package com.projectlyrics.onboarding.domain.todo.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,9 +57,7 @@ public class TodoService {
 		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
 			.orElseThrow(TodoIdNotFoundException::new);
 
-		if (todo.getMember().getId() != memberId) {
-			throw new TodoMemberNotMatchException();
-		}
+		checkTodoAndMemberIsMatch(memberId, todo);
 
 		return TodoDto.from(todo);
 	}
@@ -76,7 +73,7 @@ public class TodoService {
 
 		List<TodoDto> todoDtoList = todoList.stream()
 			.map(TodoDto::from)
-			.collect(Collectors.toUnmodifiableList());
+			.toList();
 
 		return new SliceImpl<>(todoDtoList, pageable, todoList.hasNext());
 	}
@@ -89,9 +86,7 @@ public class TodoService {
 		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
 			.orElseThrow(TodoIdNotFoundException::new);
 
-		if (todo.getMember().getId() != memberId) {
-			throw new TodoMemberNotMatchException();
-		}
+		checkTodoAndMemberIsMatch(memberId, todo);
 
 		return TodoDto.from(todo);
 	}
@@ -107,7 +102,7 @@ public class TodoService {
 
 		List<TodoDto> todoDtoList = todoList.stream()
 			.map(TodoDto::from)
-			.collect(Collectors.toUnmodifiableList());
+			.toList();
 
 		return new SliceImpl<>(todoDtoList, pageable, todoList.hasNext());
 	}
@@ -121,9 +116,7 @@ public class TodoService {
 		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
 			.orElseThrow(TodoIdNotFoundException::new);
 
-		if (todo.getMember().getId() != memberId) {
-			throw new TodoMemberNotMatchException();
-		}
+		checkTodoAndMemberIsMatch(memberId, todo);
 
 		todo.updateTodo(requestDto.title(), requestDto.memo());
 
@@ -139,9 +132,7 @@ public class TodoService {
 		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
 			.orElseThrow(TodoIdNotFoundException::new);
 
-		if (todo.getMember().getId() != memberId) {
-			throw new TodoMemberNotMatchException();
-		}
+		checkTodoAndMemberIsMatch(memberId, todo);
 
 		todo.deleteTodo();
 	}
@@ -155,9 +146,7 @@ public class TodoService {
 		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
 			.orElseThrow(TodoIdNotFoundException::new);
 
-		if (todo.getMember().getId() != memberId) {
-			throw new TodoMemberNotMatchException();
-		}
+		checkTodoAndMemberIsMatch(memberId, todo);
 
 		todoRepository.deleteById(todoId);
 	}
@@ -171,12 +160,16 @@ public class TodoService {
 		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
 			.orElseThrow(TodoIdNotFoundException::new);
 
-		if (todo.getMember().getId() != memberId) {
-			throw new TodoMemberNotMatchException();
-		}
+		checkTodoAndMemberIsMatch(memberId, todo);
 
 		todo.restoreTodo();
 
 		return TodoDto.from(todo);
+	}
+
+	private void checkTodoAndMemberIsMatch(Long memberId, Todo todo) {
+		if (todo.getMember().getId() != memberId) {
+			throw new TodoMemberNotMatchException();
+		}
 	}
 }
