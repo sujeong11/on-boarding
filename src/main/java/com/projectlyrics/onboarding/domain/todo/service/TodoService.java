@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,9 +68,9 @@ public class TodoService {
 			throw new MemberIdNotFoundException();
 		}
 
-		Pageable pageable = PageRequest.of(0, size);
+		Pageable pageable = PageRequest.of(0, size, Sort.by("orders"));
 
-		Slice<Todo> todoList = todoRepository.findNotDeletedTodoAll(startTodoId, pageable);
+		Slice<Todo> todoList = todoRepository.findNotDeletedTodoAll(memberId, startTodoId, pageable);
 
 		List<TodoDto> todoDtoList = todoList.stream()
 			.map(TodoDto::from)
@@ -96,9 +97,9 @@ public class TodoService {
 			throw new MemberIdNotFoundException();
 		}
 
-		Pageable pageable = PageRequest.of(0, size);
+		Pageable pageable = PageRequest.of(0, size, Sort.by("orders"));
 
-		Slice<Todo> todoList = todoRepository.findDeletedTodoAll(startTodoId, pageable);
+		Slice<Todo> todoList = todoRepository.findDeletedTodoAll(memberId, startTodoId, pageable);
 
 		List<TodoDto> todoDtoList = todoList.stream()
 			.map(TodoDto::from)
