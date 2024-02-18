@@ -1,5 +1,6 @@
 package com.projectlyrics.onboarding.domain.todo.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -19,13 +20,24 @@ public interface TodoRepository extends Repository<Todo, Long> {
 
 	Optional<Todo> findByIdAndIsDeletedIsFalse(Long todoId);
 
-	@Query("SELECT t FROM Todo t WHERE t.id > :startTodoId AND t.member.id = :memberId AND t.isDeleted = FALSE")
+	@Query("SELECT t FROM Todo t "
+		+ "WHERE t.id > :startTodoId "
+		+ "AND t.member.id = :memberId "
+		+ "AND t.isDeleted = FALSE")
 	Slice<Todo> findNotDeletedTodoAll(@Param("memberId") Long memberId, @Param("startTodoId") Long startTodoId, Pageable pageable);
 
 	Optional<Todo> findByIdAndIsDeletedIsTrue(Long todoId);
 
-	@Query("SELECT t FROM Todo t WHERE t.id > :startTodoId AND t.member.id = :memberId AND t.isDeleted = TRUE")
+	@Query("SELECT t FROM Todo t "
+		+ "WHERE t.id > :startTodoId "
+		+ "AND t.member.id = :memberId "
+		+ "AND t.isDeleted = TRUE")
 	Slice<Todo> findDeletedTodoAll(@Param("memberId") Long memberId, @Param("startTodoId") Long startTodoId, Pageable pageable);
 
 	void deleteById(Long todoId);
+
+	@Query("SELECT t FROM Todo t "
+		+ "WHERE t.member.id = :memberId "
+		+ "AND t.orders BETWEEN :start AND :end")
+	List<Todo> findTodoBetweenOrders(@Param("memberId") Long memberId, @Param("start") int start, @Param("end") int end);
 }

@@ -168,9 +168,41 @@ public class TodoService {
 		return TodoDto.from(todo);
 	}
 
+	@Transactional
+	public void reorderTodo(Long memberId, Long todoId, int to) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberIdNotFoundException();
+		}
+
+		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
+			.orElseThrow(TodoIdNotFoundException::new);
+
+		checkTodoAndMemberIsMatch(memberId, todo);
+
+		updateOrders(memberId, to, todo);
+	}
+
 	private void checkTodoAndMemberIsMatch(Long memberId, Todo todo) {
 		if (todo.getMember().getId() != memberId) {
 			throw new TodoMemberNotMatchException();
 		}
+	}
+
+	private void updateOrders(Long memberId, int to, Todo todo) {
+		if (todo.getOrders() > to) {
+			moveForward(memberId, to, todo);
+		} else {
+			moveBack(memberId, to, todo);
+		}
+	}
+
+	private void moveForward(Long memberId, int to, Todo todo) {
+		todoRepository.findTodoBetweenOrders(memberId, to, todo.getOrders() - 1).forEach(t -> t.plusOrders());
+		todo.updateOrder(to);
+	}
+
+	private void moveBack(Long memberId, int to, Todo todo) {
+		todoRepository.findTodoBetweenOrders(memberId, todo.getOrders() + 1, to).forEach(t -> t.minusOrders());
+		todo.updateOrder(to);
 	}
 }

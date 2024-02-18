@@ -124,4 +124,20 @@ public class TodoController {
 			.status(HttpStatus.OK)
 			.body(todoService.restoreTodo(memberId, todoId));
 	}
+
+	@PatchMapping("/reordering/{todoId}")
+	public ResponseEntity<Slice<TodoDto>> reorderTodo(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable(value = "todoId") Long todoId,
+		@RequestParam("to") int to,
+		@RequestParam(value = "startTodoId") Long startTodoId,
+		@RequestParam(value = "size") int size
+	) {
+		Long memberId = Long.valueOf(userDetails.getMemberId());
+		todoService.reorderTodo(memberId, todoId, to);
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(todoService.getTodoList(memberId, startTodoId, size));
+	}
 }
