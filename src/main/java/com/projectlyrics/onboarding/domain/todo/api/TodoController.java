@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.projectlyrics.onboarding.domain.todo.constant.DeletionMethod;
 import com.projectlyrics.onboarding.domain.todo.dto.TodoDto;
 import com.projectlyrics.onboarding.domain.todo.dto.request.CreateTodoRequestDto;
 import com.projectlyrics.onboarding.domain.todo.dto.request.UpdateTodoRequestDto;
+import com.projectlyrics.onboarding.domain.todo.exception.DeletionMethodNotValidException;
 import com.projectlyrics.onboarding.domain.todo.service.TodoService;
 import com.projectlyrics.onboarding.global.security.CustomUserDetails;
 
@@ -93,17 +95,17 @@ public class TodoController {
 	}
 
 	@DeleteMapping("/{todoId}")
-	public ResponseEntity<Void> softDeleteTodo(
+	public ResponseEntity<Void> deleteTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId,
 		@RequestParam(value = "method") String method
 	) {
 		Long memberId = Long.valueOf(userDetails.getMemberId());
 
-		if (Objects.equals(method, "soft")) {
-			todoService.softDeleteTodo(memberId, todoId);
-		} else {
-			todoService.hardDeleteTodo(memberId, todoId);
+		switch (DeletionMethod.valueOfIgnoreCase(method)) {
+			case SOFT -> todoService.softDeleteTodo(memberId, todoId);
+			case HARD -> todoService.hardDeleteTodo(memberId, todoId);
+			case null -> throw new DeletionMethodNotValidException();
 		}
 
 		return ResponseEntity
