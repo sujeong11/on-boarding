@@ -44,7 +44,7 @@ public class MemberService {
 			throw new LoginPasswordNotFoundException();
 		}
 
-		TokenResponseDto tokenDto = createToken();
+		TokenResponseDto tokenDto = createToken(member.getId());
 
 		member.updateRefreshToken(tokenDto.refreshToken());
 
@@ -99,9 +99,9 @@ public class MemberService {
 		);
 	}
 
-	private TokenResponseDto createToken() {
-		String accessToken = jwtTokenProvider.createAccessToken(1L, Role.USER);
-		String refreshToken = jwtTokenProvider.createRefreshToken(1L, Role.USER);
+	private TokenResponseDto createToken(Long memberId) {
+		String accessToken = jwtTokenProvider.createAccessToken(memberId, Role.USER);
+		String refreshToken = jwtTokenProvider.createRefreshToken(memberId, Role.USER);
 		return TokenResponseDto.of(accessToken, refreshToken);
 	}
 }
