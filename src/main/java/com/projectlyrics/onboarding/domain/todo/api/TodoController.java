@@ -26,13 +26,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/todos")
 @RestController
 public class TodoController {
 
 	private final TodoService todoService;
 
-	@PostMapping("/todo")
+	@PostMapping
 	public ResponseEntity<TodoDto> createTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@Valid @RequestBody CreateTodoRequestDto requestDto
@@ -44,7 +44,7 @@ public class TodoController {
 			.body(todoService.createTodo(memberId, requestDto));
 	}
 
-	@GetMapping("/todo/{todoId}")
+	@GetMapping("/{todoId}")
 	public ResponseEntity<TodoDto> getTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId,
@@ -61,7 +61,7 @@ public class TodoController {
 			.body(todoDto);
 	}
 
-	@GetMapping("/todos")
+	@GetMapping
 	public ResponseEntity<Slice<TodoDto>> getTodoList(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(value = "status", required = false) String status,
@@ -79,7 +79,7 @@ public class TodoController {
 			.body(todoDtoList);
 	}
 
-	@PatchMapping("/todo/{todoId}")
+	@PatchMapping("/{todoId}")
 	public ResponseEntity<TodoDto> updateTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId,
@@ -92,7 +92,7 @@ public class TodoController {
 			.body(todoService.updateTodo(memberId, todoId, requestDto));
 	}
 
-	@DeleteMapping("/todo/{todoId}")
+	@DeleteMapping("/{todoId}")
 	public ResponseEntity<Void> softDeleteTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId,
@@ -111,7 +111,7 @@ public class TodoController {
 			.body(null);
 	}
 
-	@PatchMapping("/todo/restoration/{todoId}")
+	@PatchMapping("/restoration/{todoId}")
 	public ResponseEntity<TodoDto> restoreTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId
