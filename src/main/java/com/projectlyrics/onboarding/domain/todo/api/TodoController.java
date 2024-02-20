@@ -6,6 +6,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,8 +26,10 @@ import com.projectlyrics.onboarding.domain.todo.service.TodoService;
 import com.projectlyrics.onboarding.global.security.CustomUserDetails;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/todos")
 @RestController
@@ -129,7 +132,7 @@ public class TodoController {
 	public ResponseEntity<Slice<TodoDto>> reorderTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId,
-		@RequestParam("to") int to,
+		@Min(1) @RequestParam("to") int to,
 		@RequestParam(value = "startTodoId") Long startTodoId,
 		@RequestParam(value = "size") int size
 	) {
