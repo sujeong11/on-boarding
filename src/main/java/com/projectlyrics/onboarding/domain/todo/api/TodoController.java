@@ -125,7 +125,7 @@ public class TodoController {
 			.body(todoService.restoreTodo(memberId, todoId));
 	}
 
-	@PatchMapping("/reordering/{todoId}")
+	@PatchMapping("/{todoId}/reordering")
 	public ResponseEntity<Slice<TodoDto>> reorderTodo(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@PathVariable(value = "todoId") Long todoId,
