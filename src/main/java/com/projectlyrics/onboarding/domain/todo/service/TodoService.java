@@ -177,6 +177,8 @@ public class TodoService {
 		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
 			.orElseThrow(TodoIdNotFoundException::new);
 
+		if (todo.getOrders() == to) return;
+
 		checkTodoAndMemberIsMatch(memberId, todo);
 
 		updateOrders(memberId, to, todo);
