@@ -190,19 +190,10 @@ public class TodoService {
 
 	private void updateOrders(Long memberId, int to, Todo todo) {
 		if (todo.getOrders() > to) {
-			moveForward(memberId, to, todo);
+			todoRepository.incrementOrdersByRange(memberId, to, todo.getOrders() - 1);
 		} else {
-			moveBack(memberId, to, todo);
+			todoRepository.decreaseOrdersByRange(memberId, todo.getOrders() + 1, to);
 		}
-	}
-
-	private void moveForward(Long memberId, int to, Todo todo) {
-		todoRepository.findTodoBetweenOrders(memberId, to, todo.getOrders() - 1).forEach(t -> t.plusOrders());
-		todo.updateOrder(to);
-	}
-
-	private void moveBack(Long memberId, int to, Todo todo) {
-		todoRepository.findTodoBetweenOrders(memberId, todo.getOrders() + 1, to).forEach(t -> t.minusOrders());
 		todo.updateOrder(to);
 	}
 }

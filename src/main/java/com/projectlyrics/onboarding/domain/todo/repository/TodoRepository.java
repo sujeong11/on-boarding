@@ -1,10 +1,10 @@
 package com.projectlyrics.onboarding.domain.todo.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -36,8 +36,17 @@ public interface TodoRepository extends Repository<Todo, Long> {
 
 	void deleteById(Long todoId);
 
-	@Query("SELECT t FROM Todo t "
+	@Modifying
+	@Query("UPDATE Todo t "
+		+ "SET t.orders = t.orders + 1 "
 		+ "WHERE t.member.id = :memberId "
 		+ "AND t.orders BETWEEN :start AND :end")
-	List<Todo> findTodoBetweenOrders(@Param("memberId") Long memberId, @Param("start") int start, @Param("end") int end);
+	int incrementOrdersByRange(@Param("memberId") Long memberId, @Param("start") int start, @Param("end") int end);
+
+	@Modifying
+	@Query("UPDATE Todo t "
+		+ "SET t.orders = t.orders - 1 "
+		+ "WHERE t.member.id = :memberId "
+		+ "AND t.orders BETWEEN :start AND :end")
+	int decreaseOrdersByRange(@Param("memberId") Long memberId, @Param("start") int start, @Param("end") int end);
 }

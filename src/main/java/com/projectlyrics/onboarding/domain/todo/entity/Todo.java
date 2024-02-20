@@ -71,14 +71,6 @@ public class Todo extends BaseTimeEntity {
 		this.isDeleted = false;
 	}
 
-	public void plusOrders() {
-		this.orders += 1;
-	}
-
-	public void minusOrders() {
-		this.orders -= 1;
-	}
-
 	public void updateOrder(int to) {
 		this.orders = to;
 	}
