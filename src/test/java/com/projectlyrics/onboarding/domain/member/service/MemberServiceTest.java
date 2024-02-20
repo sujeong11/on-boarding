@@ -54,12 +54,13 @@ class MemberServiceTest {
 		// given
 		String accessToken = "access-token";
 		String refreshToken = "refresh-token";
-		Member member = MemberTestUtil.createMember();
+		Member member = Mockito.spy(MemberTestUtil.createMember());
 		LoginRequestDto loginRequestDto = createLoginRequestDto();
+		doReturn(1L).when(member).getId();
 		given(memberRepository.findByLoginId(anyString())).willReturn(Optional.of(member));
 		given(passwordEncoder.matches(anyString(), anyString())).willReturn(true);
-		given(jwtTokenProvider.createAccessToken(anyLong(), any(Role.class))).willReturn(accessToken);
-		given(jwtTokenProvider.createRefreshToken(anyLong(), any(Role.class))).willReturn(refreshToken);
+		given(jwtTokenProvider.createAccessToken(member.getId(), Role.USER)).willReturn(accessToken);
+		given(jwtTokenProvider.createRefreshToken(member.getId(), Role.USER)).willReturn(refreshToken);
 
 		// when
 		TokenResponseDto tokenResponseDto = sut.login(loginRequestDto);
