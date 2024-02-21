@@ -53,16 +53,13 @@ public class MemberService {
 
 	@Transactional
 	public void logout(Long memberId) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(MemberIdNotFoundException::new);
-
+		Member member = findMemberById(memberId);
 		member.deleteRefreshToken();
 	}
 
 	@Transactional
 	public UpdateNicknameResponseDto updateNickname(Long memberId, UpdateNicknameRequestDto requestDto) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(MemberIdNotFoundException::new);
+		Member member = findMemberById(memberId);
 
 		if (memberRepository.existsByNickname(requestDto.nickname())) {
 			throw new NicknameDuplicatedException();
@@ -82,8 +79,7 @@ public class MemberService {
 
 	@Transactional
 	public void updatePassword(Long memberId, UpdatePasswordRequestDto requestDto) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(MemberIdNotFoundException::new);
+		Member member = findMemberById(memberId);
 
 		List<String> usedPasswordList = member.getUsedPasswordList();
 
@@ -97,6 +93,11 @@ public class MemberService {
 			member.getPassword(),
 			passwordEncoder.encode(requestDto.password())
 		);
+	}
+
+	private Member findMemberById(Long memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(MemberIdNotFoundException::new);
 	}
 
 	private TokenResponseDto createToken(Long memberId) {

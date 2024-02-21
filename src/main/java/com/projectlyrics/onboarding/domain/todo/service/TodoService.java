@@ -18,7 +18,6 @@ import com.projectlyrics.onboarding.domain.todo.dto.request.CreateTodoRequestDto
 import com.projectlyrics.onboarding.domain.todo.dto.request.UpdateTodoRequestDto;
 import com.projectlyrics.onboarding.domain.todo.entity.Todo;
 import com.projectlyrics.onboarding.domain.todo.exception.TodoIdNotFoundException;
-import com.projectlyrics.onboarding.domain.todo.exception.TodoMemberNotMatchException;
 import com.projectlyrics.onboarding.domain.todo.repository.TodoRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -51,22 +50,13 @@ public class TodoService {
 	}
 
 	public TodoDto getTodo(Long memberId, Long todoId) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
-
-		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
-			.orElseThrow(TodoIdNotFoundException::new);
-
-		checkTodoAndMemberIsMatch(memberId, todo);
-
+		checkMemberExists(memberId);
+		Todo todo = findTodoById(todoId);
 		return TodoDto.from(todo);
 	}
 
 	public Slice<TodoDto> getTodoList(Long memberId, Long startTodoId, int size) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
+		checkMemberExists(memberId);
 
 		Pageable pageable = PageRequest.of(0, size, Sort.by("orders"));
 
@@ -80,22 +70,13 @@ public class TodoService {
 	}
 
 	public TodoDto getDeletedTodo(Long memberId, Long todoId) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
-
-		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
-			.orElseThrow(TodoIdNotFoundException::new);
-
-		checkTodoAndMemberIsMatch(memberId, todo);
-
+		checkMemberExists(memberId);
+		Todo todo = findDeletedTodoById(todoId);
 		return TodoDto.from(todo);
 	}
 
 	public Slice<TodoDto> getDeletedTodoList(Long memberId, Long startTodoId, int size) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
+		checkMemberExists(memberId);
 
 		Pageable pageable = PageRequest.of(0, size, Sort.by("orders"));
 
@@ -110,15 +91,9 @@ public class TodoService {
 
 	@Transactional
 	public TodoDto updateTodo(Long memberId, Long todoId, UpdateTodoRequestDto requestDto) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
+		checkMemberExists(memberId);
 
-		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
-			.orElseThrow(TodoIdNotFoundException::new);
-
-		checkTodoAndMemberIsMatch(memberId, todo);
-
+		Todo todo = findTodoById(todoId);
 		todo.updateTodo(requestDto.title(), requestDto.memo());
 
 		return TodoDto.from(todo);
@@ -126,43 +101,25 @@ public class TodoService {
 
 	@Transactional
 	public void softDeleteTodo(Long memberId, Long todoId) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
+		checkMemberExists(memberId);
 
-		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
-			.orElseThrow(TodoIdNotFoundException::new);
-
-		checkTodoAndMemberIsMatch(memberId, todo);
-
+		Todo todo = findTodoById(todoId);
 		todo.deleteTodo();
 	}
 
 	@Transactional
 	public void hardDeleteTodo(Long memberId, Long todoId) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
+		checkMemberExists(memberId);
 
-		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
-			.orElseThrow(TodoIdNotFoundException::new);
-
-		checkTodoAndMemberIsMatch(memberId, todo);
-
-		todoRepository.deleteById(todoId);
+		Todo todo = findDeletedTodoById(todoId);
+		todoRepository.delete(todo);
 	}
 
 	@Transactional
 	public TodoDto restoreTodo(Long memberId, Long todoId) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
-		}
+		checkMemberExists(memberId);
 
-		Todo todo = todoRepository.findByIdAndIsDeletedIsTrue(todoId)
-			.orElseThrow(TodoIdNotFoundException::new);
-
-		checkTodoAndMemberIsMatch(memberId, todo);
-
+		Todo todo = findDeletedTodoById(todoId);
 		todo.restoreTodo();
 
 		return TodoDto.from(todo);
@@ -170,24 +127,29 @@ public class TodoService {
 
 	@Transactional
 	public void reorderTodo(Long memberId, Long todoId, int to) {
-		if (!memberRepository.existsById(memberId)) {
-			throw new MemberIdNotFoundException();
+		checkMemberExists(memberId);
+
+		Todo todo = findTodoById(todoId);
+		if (todo.getOrders() == to) {
+			return;
 		}
-
-		Todo todo = todoRepository.findByIdAndIsDeletedIsFalse(todoId)
-			.orElseThrow(TodoIdNotFoundException::new);
-
-		if (todo.getOrders() == to) return;
-
-		checkTodoAndMemberIsMatch(memberId, todo);
-
 		updateOrders(memberId, to, todo);
 	}
 
-	private void checkTodoAndMemberIsMatch(Long memberId, Todo todo) {
-		if (todo.getMember().getId() != memberId) {
-			throw new TodoMemberNotMatchException();
+	private void checkMemberExists(Long memberId) {
+		if (!memberRepository.existsById(memberId)) {
+			throw new MemberIdNotFoundException();
 		}
+	}
+
+	private Todo findTodoById(Long todoId) {
+		return todoRepository.findByIdAndIsDeletedIsFalse(todoId)
+			.orElseThrow(TodoIdNotFoundException::new);
+	}
+
+	private Todo findDeletedTodoById(Long todoId) {
+		return todoRepository.findByIdAndIsDeletedIsTrue(todoId)
+			.orElseThrow(TodoIdNotFoundException::new);
 	}
 
 	private void updateOrders(Long memberId, int to, Todo todo) {

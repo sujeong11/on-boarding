@@ -34,7 +34,7 @@ public interface TodoRepository extends Repository<Todo, Long> {
 		+ "AND t.isDeleted = TRUE")
 	Slice<Todo> findDeletedTodoAll(@Param("memberId") Long memberId, @Param("startTodoId") Long startTodoId, Pageable pageable);
 
-	void deleteById(Long todoId);
+	void delete(Todo todo);
 
 	@Modifying
 	@Query("UPDATE Todo t "
