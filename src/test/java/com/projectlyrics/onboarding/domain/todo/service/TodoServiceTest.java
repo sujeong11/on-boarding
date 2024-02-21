@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.repository.MemberRepository;
+import com.projectlyrics.onboarding.domain.todo.dto.request.UpdateTodoRequestDto;
 import com.projectlyrics.onboarding.domain.todo.entity.Todo;
 import com.projectlyrics.onboarding.domain.todo.repository.TodoRepository;
 import com.projectlyrics.onboarding.util.MemberTestUtil;
@@ -45,14 +46,14 @@ class TodoServiceTest {
 	@Test
 	void todo를_원래_순서보다_뒤로_이동시킨다면_원래_위치_다음부터_이동시킬_위치까지의_위치_값을_모두_1씩_더해준다() {
 		// given
-		int to = 3;
+		int newOrder = 3;
 		Long targetTodoId = todo.getId();
 
 		// when
-		sut.reorderTodo(member.getId(), targetTodoId, to);
+		sut.updateTodo(member.getId(), targetTodoId, createUpdateTodoRequestDto(newOrder));
 
 		// then
-		assertThat(findTodoOrder(targetTodoId)).isEqualTo(to);
+		assertThat(findTodoOrder(targetTodoId)).isEqualTo(newOrder);
 		assertThat(findTodoOrder(todo2.getId())).isEqualTo(1);
 		assertThat(findTodoOrder(todo3.getId())).isEqualTo(2);
 		assertThat(findTodoOrder(todo4.getId())).isEqualTo(4);
@@ -62,21 +63,25 @@ class TodoServiceTest {
 	@Test
 	void todo를_원래_순서보다_앞으로_이동시킨다면_원래_위치부터_이동시킬_위치_이전까지의_위치_값을_모두_1씩_빼준다() {
 		// given
-		int to = 2;
+		int newOrder = 2;
 		Long targetTodoId = todo4.getId();
 
 		// when
-		sut.reorderTodo(member.getId(), targetTodoId, to);
+		sut.updateTodo(member.getId(), targetTodoId, createUpdateTodoRequestDto(newOrder));
 
 		// then
 		assertThat(findTodoOrder(todo.getId())).isEqualTo(1);
 		assertThat(findTodoOrder(todo2.getId())).isEqualTo(3);
 		assertThat(findTodoOrder(todo3.getId())).isEqualTo(4);
-		assertThat(findTodoOrder(targetTodoId)).isEqualTo(to);
+		assertThat(findTodoOrder(targetTodoId)).isEqualTo(newOrder);
 		assertThat(findTodoOrder(todo5.getId())).isEqualTo(5);
 	}
 
 	private int findTodoOrder(Long todoId) {
 		return todoRepository.findByIdAndIsDeletedIsFalse(todoId, member.getId()).get().getOrders();
+	}
+
+	private UpdateTodoRequestDto createUpdateTodoRequestDto(int newOrder) {
+		return new UpdateTodoRequestDto(null, null, newOrder, null);
 	}
 }

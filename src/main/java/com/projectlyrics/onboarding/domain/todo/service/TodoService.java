@@ -1,6 +1,7 @@
 package com.projectlyrics.onboarding.domain.todo.service;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.projectlyrics.onboarding.domain.member.entity.Member;
 import com.projectlyrics.onboarding.domain.member.exception.MemberIdNotFoundException;
@@ -93,8 +95,12 @@ public class TodoService {
 	public TodoDto updateTodo(Long memberId, Long todoId, UpdateTodoRequestDto requestDto) {
 		checkMemberExists(memberId);
 
-		Todo todo = findTodoById(todoId, memberId);
-		todo.updateTodo(requestDto.title(), requestDto.memo());
+		Todo todo = isTodoRestore(requestDto.isRestore())
+			? restoreTodo(todoId, memberId) : findTodoById(todoId, memberId);
+
+		updateTitle(todo, requestDto.title());
+		updateMemo(todo, requestDto.memo());
+		updateOrders(memberId, todo, requestDto.order());
 
 		return TodoDto.from(todo);
 	}
@@ -102,38 +108,17 @@ public class TodoService {
 	@Transactional
 	public void softDeleteTodo(Long memberId, Long todoId) {
 		checkMemberExists(memberId);
-
 		Todo todo = findTodoById(todoId, memberId);
+
 		todo.deleteTodo();
 	}
 
 	@Transactional
 	public void hardDeleteTodo(Long memberId, Long todoId) {
 		checkMemberExists(memberId);
-
 		Todo todo = findDeletedTodoById(todoId, memberId);
+
 		todoRepository.delete(todo);
-	}
-
-	@Transactional
-	public TodoDto restoreTodo(Long memberId, Long todoId) {
-		checkMemberExists(memberId);
-
-		Todo todo = findDeletedTodoById(todoId, memberId);
-		todo.restoreTodo();
-
-		return TodoDto.from(todo);
-	}
-
-	@Transactional
-	public void reorderTodo(Long memberId, Long todoId, int to) {
-		checkMemberExists(memberId);
-
-		Todo todo = findTodoById(todoId, memberId);
-		if (todo.getOrders() == to) {
-			return;
-		}
-		updateOrders(memberId, to, todo);
 	}
 
 	private void checkMemberExists(Long memberId) {
@@ -152,12 +137,40 @@ public class TodoService {
 			.orElseThrow(TodoIdNotFoundException::new);
 	}
 
-	private void updateOrders(Long memberId, int to, Todo todo) {
+	private void updateTitle(Todo todo, String newTitle) {
+		if (StringUtils.hasText(newTitle)) todo.updateTitle(newTitle);
+	}
+
+	private void updateMemo(Todo todo, String newMemo) {
+		if (StringUtils.hasText(newMemo)) todo.updateMemo(newMemo);
+	}
+
+	private boolean validateTodoOrders(int currentOrder, int newOrder) {
+		return !(currentOrder == newOrder) && newOrder > 0;
+	}
+
+	private void updateOrders(Long memberId, Todo todo, int newOrder) {
+		if (!Objects.isNull(newOrder) && validateTodoOrders(todo.getOrders(), newOrder)) {
+			updateEachOrder(memberId, newOrder, todo);
+		}
+	}
+
+	private void updateEachOrder(Long memberId, int to, Todo todo) {
 		if (todo.getOrders() > to) {
 			todoRepository.incrementOrdersByRange(memberId, to, todo.getOrders() - 1);
 		} else {
 			todoRepository.decreaseOrdersByRange(memberId, todo.getOrders() + 1, to);
 		}
 		todo.updateOrder(to);
+	}
+
+	private boolean isTodoRestore(Boolean isRestore) {
+		return !Objects.isNull(isRestore) && isRestore;
+	}
+
+	private Todo restoreTodo(Long todoId, Long memberId) {
+		Todo todo = findDeletedTodoById(todoId, memberId);
+		todo.restoreTodo();
+		return todo;
 	}
 }

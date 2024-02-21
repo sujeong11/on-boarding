@@ -115,32 +115,4 @@ public class TodoController {
 			.status(HttpStatus.NO_CONTENT)
 			.body(null);
 	}
-
-	@PatchMapping("/restoration/{todoId}")
-	public ResponseEntity<TodoDto> restoreTodo(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable(value = "todoId") Long todoId
-	) {
-		Long memberId = Long.valueOf(userDetails.getMemberId());
-
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(todoService.restoreTodo(memberId, todoId));
-	}
-
-	@PatchMapping("/{todoId}/reordering")
-	public ResponseEntity<Slice<TodoDto>> reorderTodo(
-		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@PathVariable(value = "todoId") Long todoId,
-		@Min(1) @RequestParam("to") int to,
-		@RequestParam(value = "startTodoId") Long startTodoId,
-		@RequestParam(value = "size") int size
-	) {
-		Long memberId = Long.valueOf(userDetails.getMemberId());
-		todoService.reorderTodo(memberId, todoId, to);
-
-		return ResponseEntity
-			.status(HttpStatus.OK)
-			.body(todoService.getTodoList(memberId, startTodoId, size));
-	}
 }
