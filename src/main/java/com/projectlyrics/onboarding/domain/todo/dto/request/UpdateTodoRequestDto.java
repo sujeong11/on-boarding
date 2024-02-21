@@ -3,7 +3,7 @@ package com.projectlyrics.onboarding.domain.todo.dto.request;
 public record UpdateTodoRequestDto(
 	String title,
 	String memo,
-	int order,
+	Integer order,
 	Boolean isRestore
 ) {
 }
