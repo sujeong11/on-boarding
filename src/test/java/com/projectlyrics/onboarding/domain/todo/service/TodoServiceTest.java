@@ -77,6 +77,6 @@ class TodoServiceTest {
 	}
 
 	private int findTodoOrder(Long todoId) {
-		return todoRepository.findByIdAndIsDeletedIsFalse(todoId).get().getOrders();
+		return todoRepository.findByIdAndIsDeletedIsFalse(todoId, member.getId()).get().getOrders();
 	}
 }

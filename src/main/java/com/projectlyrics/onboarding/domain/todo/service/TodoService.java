@@ -51,7 +51,7 @@ public class TodoService {
 
 	public TodoDto getTodo(Long memberId, Long todoId) {
 		checkMemberExists(memberId);
-		Todo todo = findTodoById(todoId);
+		Todo todo = findTodoById(todoId, memberId);
 		return TodoDto.from(todo);
 	}
 
@@ -71,7 +71,7 @@ public class TodoService {
 
 	public TodoDto getDeletedTodo(Long memberId, Long todoId) {
 		checkMemberExists(memberId);
-		Todo todo = findDeletedTodoById(todoId);
+		Todo todo = findDeletedTodoById(todoId, memberId);
 		return TodoDto.from(todo);
 	}
 
@@ -93,7 +93,7 @@ public class TodoService {
 	public TodoDto updateTodo(Long memberId, Long todoId, UpdateTodoRequestDto requestDto) {
 		checkMemberExists(memberId);
 
-		Todo todo = findTodoById(todoId);
+		Todo todo = findTodoById(todoId, memberId);
 		todo.updateTodo(requestDto.title(), requestDto.memo());
 
 		return TodoDto.from(todo);
@@ -103,7 +103,7 @@ public class TodoService {
 	public void softDeleteTodo(Long memberId, Long todoId) {
 		checkMemberExists(memberId);
 
-		Todo todo = findTodoById(todoId);
+		Todo todo = findTodoById(todoId, memberId);
 		todo.deleteTodo();
 	}
 
@@ -111,7 +111,7 @@ public class TodoService {
 	public void hardDeleteTodo(Long memberId, Long todoId) {
 		checkMemberExists(memberId);
 
-		Todo todo = findDeletedTodoById(todoId);
+		Todo todo = findDeletedTodoById(todoId, memberId);
 		todoRepository.delete(todo);
 	}
 
@@ -119,7 +119,7 @@ public class TodoService {
 	public TodoDto restoreTodo(Long memberId, Long todoId) {
 		checkMemberExists(memberId);
 
-		Todo todo = findDeletedTodoById(todoId);
+		Todo todo = findDeletedTodoById(todoId, memberId);
 		todo.restoreTodo();
 
 		return TodoDto.from(todo);
@@ -129,7 +129,7 @@ public class TodoService {
 	public void reorderTodo(Long memberId, Long todoId, int to) {
 		checkMemberExists(memberId);
 
-		Todo todo = findTodoById(todoId);
+		Todo todo = findTodoById(todoId, memberId);
 		if (todo.getOrders() == to) {
 			return;
 		}
@@ -142,13 +142,13 @@ public class TodoService {
 		}
 	}
 
-	private Todo findTodoById(Long todoId) {
-		return todoRepository.findByIdAndIsDeletedIsFalse(todoId)
+	private Todo findTodoById(Long todoId, Long memberId) {
+		return todoRepository.findByIdAndIsDeletedIsFalse(todoId, memberId)
 			.orElseThrow(TodoIdNotFoundException::new);
 	}
 
-	private Todo findDeletedTodoById(Long todoId) {
-		return todoRepository.findByIdAndIsDeletedIsTrue(todoId)
+	private Todo findDeletedTodoById(Long todoId, Long memberId) {
+		return todoRepository.findByIdAndIsDeletedIsTrue(todoId, memberId)
 			.orElseThrow(TodoIdNotFoundException::new);
 	}
 

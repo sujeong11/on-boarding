@@ -18,7 +18,11 @@ public interface TodoRepository extends Repository<Todo, Long> {
 
 	Todo save(Todo todo);
 
-	Optional<Todo> findByIdAndIsDeletedIsFalse(Long todoId);
+	@Query("SELECT t FROM Todo t "
+		+ "WHERE t.id = :todoId "
+		+ "AND t.member.id = :memberId "
+		+ "AND t.isDeleted = FALSE")
+	Optional<Todo> findByIdAndIsDeletedIsFalse(@Param("todoId") Long todoId, @Param("memberId") Long memberId);
 
 	@Query("SELECT t FROM Todo t "
 		+ "WHERE t.id > :startTodoId "
@@ -26,7 +30,11 @@ public interface TodoRepository extends Repository<Todo, Long> {
 		+ "AND t.isDeleted = FALSE")
 	Slice<Todo> findNotDeletedTodoAll(@Param("memberId") Long memberId, @Param("startTodoId") Long startTodoId, Pageable pageable);
 
-	Optional<Todo> findByIdAndIsDeletedIsTrue(Long todoId);
+	@Query("SELECT t FROM Todo t "
+		+ "WHERE t.id = :todoId "
+		+ "AND t.member.id = :memberId "
+		+ "AND t.isDeleted = TRUE")
+	Optional<Todo> findByIdAndIsDeletedIsTrue(@Param("todoId") Long todoId, @Param("memberId") Long memberId);
 
 	@Query("SELECT t FROM Todo t "
 		+ "WHERE t.id > :startTodoId "
