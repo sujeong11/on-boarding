@@ -10,7 +10,7 @@ public class MemberTestUtil {
 		return Member.builder()
 			.loginId("id")
 			.password(encodePassword())
-			.nickname("sujeong")
+			.nickname(createNickname())
 			.build();
 	}
 
@@ -18,12 +18,17 @@ public class MemberTestUtil {
 		return Member.builder()
 			.loginId("id")
 			.password(encodePassword())
-			.nickname("sujeong")
+			.nickname(createNickname())
 			.refreshToken("임시 Refresh Token")
 			.build();
 	}
 
 	private static String encodePassword() {
 		return new BCryptPasswordEncoder().encode("aaAA1122!");
+	}
+
+	private static String createNickname() {
+		// member의 nickname 필드는 unique 속성이 걸려있으므로 닉네임에 난수를 추가해 닉네임이 중복되지 않도록 함
+		return "sujeong" + Math.random();
 	}
 }

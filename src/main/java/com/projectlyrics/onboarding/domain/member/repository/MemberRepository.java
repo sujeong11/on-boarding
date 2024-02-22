@@ -15,4 +15,6 @@ public interface MemberRepository extends Repository<Member, Long> {
 	boolean existsByNickname(String nickname);
 
 	boolean existsById(Long memberId);
+
+	Member save(Member member);
 }

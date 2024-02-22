@@ -44,7 +44,7 @@ public class MemberService {
 			throw new LoginPasswordNotFoundException();
 		}
 
-		TokenResponseDto tokenDto = createToken();
+		TokenResponseDto tokenDto = createToken(member.getId());
 
 		member.updateRefreshToken(tokenDto.refreshToken());
 
@@ -53,16 +53,13 @@ public class MemberService {
 
 	@Transactional
 	public void logout(Long memberId) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(MemberIdNotFoundException::new);
-
+		Member member = findMemberById(memberId);
 		member.deleteRefreshToken();
 	}
 
 	@Transactional
 	public UpdateNicknameResponseDto updateNickname(Long memberId, UpdateNicknameRequestDto requestDto) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(MemberIdNotFoundException::new);
+		Member member = findMemberById(memberId);
 
 		if (memberRepository.existsByNickname(requestDto.nickname())) {
 			throw new NicknameDuplicatedException();
@@ -82,8 +79,7 @@ public class MemberService {
 
 	@Transactional
 	public void updatePassword(Long memberId, UpdatePasswordRequestDto requestDto) {
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(MemberIdNotFoundException::new);
+		Member member = findMemberById(memberId);
 
 		List<String> usedPasswordList = member.getUsedPasswordList();
 
@@ -99,9 +95,14 @@ public class MemberService {
 		);
 	}
 
-	private TokenResponseDto createToken() {
-		String accessToken = jwtTokenProvider.createAccessToken(1L, Role.USER);
-		String refreshToken = jwtTokenProvider.createRefreshToken(1L, Role.USER);
+	private Member findMemberById(Long memberId) {
+		return memberRepository.findById(memberId)
+			.orElseThrow(MemberIdNotFoundException::new);
+	}
+
+	private TokenResponseDto createToken(Long memberId) {
+		String accessToken = jwtTokenProvider.createAccessToken(memberId, Role.USER);
+		String refreshToken = jwtTokenProvider.createRefreshToken(memberId, Role.USER);
 		return TokenResponseDto.of(accessToken, refreshToken);
 	}
 }
